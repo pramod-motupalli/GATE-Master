@@ -6,7 +6,7 @@ export default function Home() {
     return (
         // MODIFICATION 1: Use h-screen and overflow-hidden to contain everything
         // This prevents the entire page from scrolling.
-        <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-900 text-white">
+        <div className="flex flex-col md:flex-row h-full md:h-screen overflow-hidden bg-gray-900 text-white">
             {/* Sidebar Navigation */}
             <div>
                 <Navbar />
@@ -14,7 +14,7 @@ export default function Home() {
 
             {/* Main Content */}
             {/* MODIFICATION 2: Removed overflow-y-auto */}
-            <main className="flex-1">
+           <main className="flex-1 h-full md:h-screen overflow-y-auto md:overflow-hidden">
                 {/* Hero Section */}
                 {/* MODIFICATION 3: Reduced vertical padding to help content fit */}
                 <section className="relative bg-gray-900 py-12 sm:py-16 px-6 text-center isolate">

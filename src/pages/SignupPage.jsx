@@ -1,21 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { User, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
 
         if (password !== confirmPassword) {
-            alert("Passwords don't match!");
+            setError("Passwords do not match.");
             return;
         }
 
+        setIsLoading(true);
         try {
             const res = await fetch(
                 "https://gate-master-backend.onrender.com/register",
@@ -32,109 +42,127 @@ export default function SignupPage() {
                 data = await res.json();
             } else {
                 const text = await res.text();
-                data = { message: text || res.statusText };
+                throw new Error(text || res.statusText);
             }
 
             if (res.ok) {
-                alert(data.message || "Signup successful!");
+                // On success, redirect to login page.
+                // A toast notification could be added here for better UX.
                 navigate("/login");
             } else {
-                alert(`Signup failed: ${data.message}`);
+                setError(data.message || "An unknown error occurred.");
             }
         } catch (err) {
-            console.error(err);
-            alert("Something went wrong. Please try again later.");
+            console.error("Signup error:", err);
+            setError(err.message || "Network error. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-200 px-4">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8"
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 overflow-hidden relative px-4">
+            {/* Animated background blobs */}
+            <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-40 animate-blob"></div>
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+
+            <motion.div
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-md p-8 space-y-8 rounded-2xl shadow-2xl backdrop-blur-lg bg-black/30 border border-white/10 z-10"
             >
-                <h2 className="text-3xl font-bold text-center text-blue-700 mb-2">
-                    Create Account
-                </h2>
-                <p className="text-center text-gray-600 mb-6">
-                    Sign up to get started
-                </p>
-
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="John Doe"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
+                <div className="text-center">
+                    <div className="inline-block p-3 bg-purple-500/20 rounded-full mb-4">
+                        <UserPlus className="text-purple-400 w-10 h-10" />
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Confirm Password
-                        </label>
-                        <input
-                            type="password"
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
-                    >
-                        Sign Up
-                    </button>
+                    <h1 className="text-4xl font-bold text-white tracking-tight">
+                        Create an Account
+                    </h1>
+                    <p className="mt-2 text-slate-400">
+                        Join us and start your journey.
+                    </p>
                 </div>
 
-                <p className="text-center text-sm text-gray-500 mt-6">
-                    Already have an account?{" "}
-                    <span
-                        className="text-blue-600 underline cursor-pointer"
-                        onClick={() => navigate("/login")}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="text" value={name} onChange={(e) => setName(e.target.value)}
+                            placeholder="Full Name" required
+                            className="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        />
+                    </div>
+                    <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email address" required
+                            className="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password" required
+                            className="w-full pl-12 pr-12 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-400 transition-colors">
+                            {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                        </button>
+                    </div>
+
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm Password" required
+                            className="w-full pl-12 pr-12 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        />
+                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-400 transition-colors">
+                            {showConfirmPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                        </button>
+                    </div>
+
+                     {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2 p-3 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30"
+                        >
+                            <AlertCircle size={20} />
+                            <p className="text-sm">{error}</p>
+                        </motion.div>
+                    )}
+
+                    <button
+                        type="submit" disabled={isLoading}
+                        className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-semibold shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        Sign In
-                    </span>
-                </p>
-            </form>
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="animate-spin" />
+                                <span>Creating Account...</span>
+                            </>
+                        ) : (
+                            "Sign Up"
+                        )}
+                    </button>
+
+                    <div className="text-sm text-center text-slate-400">
+                        <span className="mr-2">Already have an account?</span>
+                        <button
+                            type="button" onClick={() => navigate("/login")}
+                            className="font-medium text-purple-400 hover:text-purple-300 underline underline-offset-2"
+                        >
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+            </motion.div>
         </div>
     );
 }

@@ -4,56 +4,24 @@ import axios from "axios";
 import questionBank from "./questionBank"; // Ensure this path is correct
 
 // --- API Helper Functions (Simulated) ---
-// In a real app, you'd implement these endpoints on your server.
-
-/**
- * Simulates fetching an existing test session.
- * In a real backend, this would check a database for an active, unsubmitted attempt
- * for the given user and test.
- */
 const fetchTestSession = async (subjectId, paperId, token) => {
-    // SIMULATION LOGIC: We'll use sessionStorage for this demo to simulate a server session
-    // that persists across refreshes but is cleared when the tab closes.
-    // In your REAL app, this would be a `axios.get` call.
     const sessionKey = `test_session_${subjectId}_${paperId}`;
     const savedSession = sessionStorage.getItem(sessionKey);
-
     if (savedSession) {
         console.log("Found existing session in sessionStorage (simulation).");
         return JSON.parse(savedSession);
     }
-
-    // If you had a real endpoint:
-    // const response = await axios.get(`https://gate-master-backend.onrender.com/api/attempts/session/${subjectId}/${paperId}`, {
-    //   headers: { 'Authorization': `Bearer ${token}` }
-    // });
-    // return response.data; // e.g., { startTime: number, responses: {} }
-
-    return null; // No active session found
+    return null;
 };
 
-/**
- * Simulates starting a new test session.
- * In a real backend, this would create a new attempt record with a server-side timestamp.
- */
 const startTestSession = async (subjectId, paperId, token) => {
-    // SIMULATION LOGIC:
-    const sessionData = {
-        startTime: Date.now(),
-        responses: {}, // Start with empty responses
-    };
+    const sessionData = { startTime: Date.now(), responses: {} };
     const sessionKey = `test_session_${subjectId}_${paperId}`;
     sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
     console.log(
         "Started and saved a new session in sessionStorage (simulation)."
     );
     return sessionData;
-
-    // If you had a real endpoint:
-    // const response = await axios.post('https://gate-master-backend.onrender.com/api/attempts/start', { subjectId, paperId }, {
-    //   headers: { 'Authorization': `Bearer ${token}` }
-    // });
-    // return response.data; // e.g., { startTime: number, responses: {} }
 };
 
 // --- The Main Component ---
@@ -65,11 +33,11 @@ export default function PaperTestPage() {
     // --- State Management ---
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [responses, setResponses] = useState({});
-    const [visited, setVisited] = useState(new Set([0])); // Track visited questions for the palette
+    const [visited, setVisited] = useState(new Set([0]));
     const [showScore, setShowScore] = useState(false);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes, default
-    const [isLoading, setIsLoading] = useState(true); // For initial session loading
+    const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
+    const [isLoading, setIsLoading] = useState(true);
 
     const responsesRef = useRef(responses);
     responsesRef.current = responses;
@@ -135,11 +103,9 @@ export default function PaperTestPage() {
                     }
                 );
 
-                // Clear the simulated session on successful submission
                 sessionStorage.removeItem(
                     `test_session_${subjectId}_${paperId}`
                 );
-
                 setScore(finalScore);
                 setShowScore(true);
             } catch (error) {
@@ -152,7 +118,6 @@ export default function PaperTestPage() {
         [questions, subjectId, paperId, navigate]
     );
 
-    // Effect for initializing the test session and timer
     useEffect(() => {
         if (isReviewMode) {
             const { reviewData } = location.state;
@@ -184,7 +149,7 @@ export default function PaperTestPage() {
                 const remaining = 1800 - elapsed;
 
                 if (remaining <= 0) {
-                    handleSubmit(true); // Auto-submit if time is already over
+                    handleSubmit(true);
                 } else {
                     setTimeLeft(remaining);
                     setResponses(savedResponses || {});
@@ -208,21 +173,18 @@ export default function PaperTestPage() {
         handleSubmit,
     ]);
 
-    // Effect for the countdown timer
     useEffect(() => {
         if (isLoading || isReviewMode || showScore) return;
-
         const timerInterval = setInterval(() => {
             setTimeLeft((prevTime) => {
                 if (prevTime <= 1) {
                     clearInterval(timerInterval);
-                    handleSubmit(true); // Auto-submit when time runs out
+                    handleSubmit(true);
                     return 0;
                 }
                 return prevTime - 1;
             });
         }, 1000);
-
         return () => clearInterval(timerInterval);
     }, [isLoading, isReviewMode, showScore, handleSubmit]);
 
@@ -285,11 +247,10 @@ export default function PaperTestPage() {
         const isAnswered = Array.isArray(response)
             ? response.length > 0
             : !!response;
-
-        if (currentQuestionIndex === index) return "bg-purple-600 text-white"; // Current
-        if (isAnswered) return "bg-green-600 text-white"; // Answered
-        if (visited.has(index)) return "bg-red-600 text-white"; // Not Answered (but visited)
-        return "bg-gray-700 hover:bg-gray-600"; // Not Visited
+        if (currentQuestionIndex === index) return "bg-purple-600 text-white";
+        if (isAnswered) return "bg-green-600 text-white";
+        if (visited.has(index)) return "bg-red-600 text-white";
+        return "bg-gray-700 hover:bg-gray-600";
     };
 
     // --- RENDER LOGIC ---
@@ -305,9 +266,9 @@ export default function PaperTestPage() {
     if (questions.length === 0 && !isReviewMode) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-                ...
+                Paper not found. Please go back.
             </div>
-        ); // Simplified empty state
+        );
     }
 
     // --- SCORE/REVIEW SCREEN ---
@@ -332,6 +293,7 @@ export default function PaperTestPage() {
         };
 
         return (
+            // FIX: Removed sm:overflow-y-auto to allow natural page scrolling
             <div className="bg-gray-900 text-white min-h-screen p-4 md:p-8">
                 <div className="max-w-4xl mx-auto">
                     <header className="text-center mb-8 p-6 bg-gray-800 rounded-xl shadow-lg">
@@ -342,7 +304,6 @@ export default function PaperTestPage() {
                             Here's a summary of your performance.
                         </p>
                     </header>
-
                     <div className="grid md:grid-cols-3 gap-6 mb-8">
                         <div className="md:col-span-1 flex flex-col items-center justify-center bg-gray-800 p-6 rounded-xl shadow-lg">
                             <div className="relative w-40 h-40">
@@ -390,7 +351,6 @@ export default function PaperTestPage() {
                                 Score: {score} / {total}
                             </p>
                         </div>
-
                         <div className="md:col-span-2 grid grid-cols-2 gap-4 text-center">
                             {[
                                 {
@@ -432,7 +392,6 @@ export default function PaperTestPage() {
                             ))}
                         </div>
                     </div>
-
                     <div className="space-y-4">
                         {questions.map((q, i) => {
                             const userAnswer = responses[q.id];
@@ -456,7 +415,6 @@ export default function PaperTestPage() {
                             } else {
                                 isCorrect = userAnswer === q.answer;
                             }
-
                             return (
                                 <div
                                     key={q.id}
@@ -466,11 +424,13 @@ export default function PaperTestPage() {
                                             : "border-red-500"
                                     } bg-gray-800`}
                                 >
-                                    <p className="font-semibold mb-3 text-gray-200">
+                                    {/* FIX: Added break-words to prevent overflow */}
+                                    <p className="font-semibold mb-3 text-gray-200 break-words">
                                         Q{i + 1}: {q.question}
                                     </p>
+                                    {/* FIX: Added break-words to prevent overflow */}
                                     <p
-                                        className={`mb-1 ${
+                                        className={`mb-1 break-words ${
                                             isCorrect
                                                 ? "text-green-400"
                                                 : "text-red-400"
@@ -482,7 +442,8 @@ export default function PaperTestPage() {
                                         {formatAnswerForDisplay(userAnswer)}
                                     </p>
                                     {!isCorrect && (
-                                        <p className="text-green-400">
+                                        // FIX: Added break-words to prevent overflow
+                                        <p className="text-green-400 break-words">
                                             <span className="font-bold">
                                                 Correct Answer:
                                             </span>{" "}
@@ -493,7 +454,6 @@ export default function PaperTestPage() {
                             );
                         })}
                     </div>
-
                     <div className="text-center mt-8">
                         <button
                             onClick={() => navigate("/attempted")}
@@ -516,7 +476,8 @@ export default function PaperTestPage() {
         <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
             <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Question Panel */}
-                <div className="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-2xl">
+                {/* FIX: Changed p-6 to p-4 sm:p-6 for better mobile padding */}
+                <div className="lg:col-span-2 bg-gray-800 p-4 sm:p-6 rounded-xl shadow-2xl">
                     <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
                         <h2 className="text-xl font-semibold text-cyan-400">
                             Question {currentQuestionIndex + 1}
@@ -526,11 +487,10 @@ export default function PaperTestPage() {
                             <span>{formatTime(timeLeft)}</span>
                         </div>
                     </div>
-
-                    <p className="mb-6 text-lg text-gray-200 min-h-[60px]">
+                    {/* FIX: Added break-words to prevent question text from overflowing */}
+                    <p className="mb-6 text-lg text-gray-200 min-h-[60px] break-words">
                         {currentQuestion.question}
                     </p>
-
                     <div className="space-y-3">
                         {currentQuestion.type === "mcq" &&
                             currentQuestion.options.map((option, i) => (
@@ -549,7 +509,8 @@ export default function PaperTestPage() {
                                         onChange={handleOptionChange}
                                         className="w-5 h-5 text-cyan-600 bg-gray-700 border-gray-600 focus:ring-cyan-500"
                                     />
-                                    <span className="ml-4 text-gray-300">
+                                    {/* FIX: Added break-words to prevent option text from overflowing */}
+                                    <span className="ml-4 text-gray-300 break-words">
                                         {option}
                                     </span>
                                 </label>
@@ -572,7 +533,8 @@ export default function PaperTestPage() {
                                         onChange={handleOptionChange}
                                         className="w-5 h-5 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
                                     />
-                                    <span className="ml-4 text-gray-300">
+                                    {/* FIX: Added break-words to prevent option text from overflowing */}
+                                    <span className="ml-4 text-gray-300 break-words">
                                         {option}
                                     </span>
                                 </label>
@@ -588,7 +550,6 @@ export default function PaperTestPage() {
                         )}
                     </div>
                 </div>
-
                 {/* Sidebar Panel */}
                 <div className="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-2xl flex flex-col">
                     <div className="border-b border-gray-700 pb-4 mb-4">
@@ -599,7 +560,6 @@ export default function PaperTestPage() {
                             Paper ID: {paperId}
                         </p>
                     </div>
-
                     <div className="flex-grow">
                         <h4 className="text-md font-semibold text-gray-300 mb-3 text-center">
                             Question Palette
@@ -618,7 +578,6 @@ export default function PaperTestPage() {
                             ))}
                         </div>
                     </div>
-
                     <div className="mt-6 space-y-3">
                         <div className="flex justify-between">
                             <button
