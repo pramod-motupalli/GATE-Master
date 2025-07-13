@@ -1,0 +1,52 @@
+/* PaperTestPage.module.css */
+.pageContainer {
+    background-color: black;
+    color: white;
+    padding: 24px;
+  }
+  
+  .questionHeader {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .questionText {
+    margin-bottom: 1rem;
+  }
+  
+  .optionsContainer {
+    margin-bottom: 1rem;
+  }
+  
+  .option {
+    margin-bottom: 0.5rem;
+  }
+  
+  .button {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  }
+  
+  .buttonBack {
+    background-color: #4b5563;
+    margin-top: 1.5rem;
+  }
+  
+  .correctAnswer {
+    background-color: #10b981;
+    padding: 0.5rem;
+  }
+  
+  .incorrectAnswer {
+    background-color: #ef4444;
+    padding: 0.5rem;
+  }
+  
+  .scoreContainer {
+    margin-top: 1.5rem;
+  }
+  
