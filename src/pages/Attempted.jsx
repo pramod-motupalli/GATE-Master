@@ -65,7 +65,7 @@ export default function Attempted() {
                 return;
             }
 
-            const response = await axios.get('http://localhost:5000/api/attempts', {
+            const response = await axios.get('https://gate-master-backend.onrender.com/api/attempts', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             

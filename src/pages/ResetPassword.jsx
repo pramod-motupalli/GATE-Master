@@ -9,7 +9,7 @@ export default function ResetPasswordSimple() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const res = await fetch("http://localhost:5000/api/reset-password", {
+    const res = await fetch("https://gate-master-backend.onrender.com/api/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, newPassword })

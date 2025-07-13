@@ -17,7 +17,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/register', {
+      const res = await fetch('https://gate-master-backend.onrender.com/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })

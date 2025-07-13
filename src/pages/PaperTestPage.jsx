@@ -24,7 +24,7 @@ const fetchTestSession = async (subjectId, paperId, token) => {
   }
 
   // If you had a real endpoint:
-  // const response = await axios.get(`http://localhost:5000/api/attempts/session/${subjectId}/${paperId}`, {
+  // const response = await axios.get(`https://gate-master-backend.onrender.com/api/attempts/session/${subjectId}/${paperId}`, {
   //   headers: { 'Authorization': `Bearer ${token}` }
   // });
   // return response.data; // e.g., { startTime: number, responses: {} }
@@ -49,7 +49,7 @@ const startTestSession = async (subjectId, paperId, token) => {
   return sessionData;
 
   // If you had a real endpoint:
-  // const response = await axios.post('http://localhost:5000/api/attempts/start', { subjectId, paperId }, {
+  // const response = await axios.post('https://gate-master-backend.onrender.com/api/attempts/start', { subjectId, paperId }, {
   //   headers: { 'Authorization': `Bearer ${token}` }
   // });
   // return response.data; // e.g., { startTime: number, responses: {} }
@@ -110,7 +110,7 @@ export default function PaperTestPage() {
         return;
       }
 
-      await axios.post('http://localhost:5000/api/attempts', attemptData, {
+      await axios.post('https://gate-master-backend.onrender.com/api/attempts', attemptData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
